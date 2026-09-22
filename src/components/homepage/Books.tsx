@@ -2,26 +2,26 @@ import React from 'react';
 import BookCard from '../shared/BookCard';
 import { IBook } from '@/types/books.type';
 
-const getBooks = async () => {
-  // const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
-  //   cache: 'no-store', // সবসময় লেটেস্ট ডাটা পাওয়ার জন্য
-  // });
-  try{
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
-  const res = await fetch(`${baseUrl}/booksData.json`, {
-    cache: 'no-store',
-  });
-  const books = await res.json();
-  return books;
-  }
-  catch(error){
-    console.log("Error", error)
-    return [];
-  }
-   finally {
-      // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে
-      setLoading(false);
+const getBooks = async (): Promise<IBook[]> => {
+  try {
+    // Vercel বা Local environment এর base URL সেট করা
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || '';
+    
+    // Server-side fetching
+    const res = await fetch(`${baseUrl}/booksData.json`, {
+      cache: 'no-store', // সবসময় ফ্রেশ ডাটা পাওয়ার জন্য
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch data: ${res.status}`);
     }
+
+    const books = await res.json();
+    return books;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    return []; // এরর হলে খালি অ্যারে রিটার্ন করবে যাতে অ্যাপ ক্র্যাশ না করে
+  }
 };
 
 const Books = async () => {
@@ -44,16 +44,16 @@ const Books = async () => {
       </div>
 
       {/* Grid Layout Container */}
-      {/* 
-        grid-cols-2    -> মোবাইল স্ক্রিনে ২টি কার্ড
-        md:grid-cols-3 -> মাঝারি/ট্যাবলেট স্ক্রিনে ৩টি কার্ড
-        lg:grid-cols-4 -> ল্যাপটপ/ফুল স্ক্রিনে ৪টি কার্ড
-        gap-2 sm:gap-6 -> ছোট স্ক্রিনে কার্ড গ্যাপ কম রাখা যেন ২টি সুন্দর ধরে
-      */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6 items-stretch">
-        {booksData.slice(0, 8).map((book: IBook, ind: number) => {
-          return <BookCard key={book.bookId || ind} book={book} />;
-        })}
+        {booksData && booksData.length > 0 ? (
+          booksData.slice(0, 8).map((book: IBook, ind: number) => (
+            <BookCard key={book.bookId || ind} book={book} />
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500 py-10">
+            No books found!
+          </p>
+        )}
       </div>
     </section>
   );

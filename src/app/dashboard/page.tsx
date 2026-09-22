@@ -53,11 +53,16 @@ export default function DashboardPage() {
       setAllBooks(data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
-    } // 👈 catch ব্লক এখানে সঠিকভাবে শেষ হয়েছে
-  }; // 👈 fetchData ফাংশন এখানে শেষ হয়েছে
+      return [];
+    } 
+     finally {
+      // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে
+      setLoading(false);
+    }
+  }; 
 
   fetchData();
-  syncLocalStorage();
+  // syncLocalStorage();
 
   const handleStorageUpdate = () => syncLocalStorage();
 

@@ -26,7 +26,12 @@ export default function Books() {
         setBooksData(books);
       } catch (error) {
         console.error(error);
-      } return[];
+        return [];
+      } 
+       finally {
+      // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে
+      setLoading(false);
+    }
     };
 
     fetchBooks();

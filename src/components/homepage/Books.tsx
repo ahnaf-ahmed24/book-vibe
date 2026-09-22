@@ -18,6 +18,10 @@ const getBooks = async () => {
     console.log("Error", error)
     return [];
   }
+   finally {
+      // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে
+      setLoading(false);
+    }
 };
 
 const Books = async () => {

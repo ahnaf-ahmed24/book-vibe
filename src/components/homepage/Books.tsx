@@ -5,7 +5,7 @@ import { IBook } from '@/types/books.type';
 const getBooks = async (): Promise<IBook[]> => {
   try {
     // Vercel বা Local environment এর base URL সেট করা
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || '';
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
     
     // Server-side fetching
     const res = await fetch(`${baseUrl}/booksData.json`, {

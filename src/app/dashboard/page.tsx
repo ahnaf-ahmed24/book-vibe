@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+
 export default function DashboardPage() {
   const [allBooks, setAllBooks] = useState<IBook[]>([]);
   const [readBookIds, setReadBookIds] = useState<number[]>([]);
@@ -45,15 +46,18 @@ export default function DashboardPage() {
   useEffect(() => {
   const fetchData = async () => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
-      const res = await fetch(`${baseUrl}/booksData.json`, {
-        cache: 'no-store',
-      });
+      // Vercel বা Local environment এর base URL সেট করা
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+    
+    // Server-side fetching
+    const res = await fetch(`${baseUrl}/booksData.json`, {
+      cache: 'no-store', // সবসময় ফ্রেশ ডাটা পাওয়ার জন্য
+    });
       const data = await res.json();
       setAllBooks(data);
     } catch (error) {
       console.error("Failed to fetch data:", error);
-      return [];
+      
     } 
      finally {
       // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে

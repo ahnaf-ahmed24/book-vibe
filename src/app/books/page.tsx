@@ -14,11 +14,13 @@ export default function Books() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
-
-        const res = await fetch(`${baseUrl}/booksData.json`, {
-          cache: 'no-store',
-        });
+        // Vercel বা Local environment এর base URL সেট করা
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+    
+    // Server-side fetching
+    const res = await fetch(`${baseUrl}/booksData.json`, {
+      cache: 'no-store', // সবসময় ফ্রেশ ডাটা পাওয়ার জন্য
+    });
         if (!res.ok) {
           throw new Error('Failed to fetch books data');
         }

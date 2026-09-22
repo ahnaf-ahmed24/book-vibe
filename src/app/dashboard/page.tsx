@@ -53,9 +53,7 @@ export default function DashboardPage() {
         setAllBooks(data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
-      }
+      return [];
     };
 
     fetchData();

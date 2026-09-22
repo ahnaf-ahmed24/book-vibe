@@ -26,9 +26,7 @@ export default function Books() {
         setBooksData(books);
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
-      }
+      } return[];
     };
 
     fetchBooks();

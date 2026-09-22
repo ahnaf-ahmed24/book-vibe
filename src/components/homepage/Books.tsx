@@ -6,12 +6,18 @@ const getBooks = async () => {
   // const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
   //   cache: 'no-store', // সবসময় লেটেস্ট ডাটা পাওয়ার জন্য
   // });
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
+  try{
+    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
   const res = await fetch(`${baseUrl}/booksData.json`, {
     cache: 'no-store',
   });
   const books = await res.json();
   return books;
+  }
+  catch(error){
+    console.log("Error", error)
+    return [];
+  }
 };
 
 const Books = async () => {

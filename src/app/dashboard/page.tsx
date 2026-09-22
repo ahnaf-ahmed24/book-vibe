@@ -43,32 +43,32 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL ;
-        const res = await fetch(`${baseUrl}/booksData.json`, {
-          cache: 'no-store',
-        });
-        const data = await res.json();
-        setAllBooks(data);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      return [];
-    };
+  const fetchData = async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
+      const res = await fetch(`${baseUrl}/booksData.json`, {
+        cache: 'no-store',
+      });
+      const data = await res.json();
+      setAllBooks(data);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    } // 👈 catch ব্লক এখানে সঠিকভাবে শেষ হয়েছে
+  }; // 👈 fetchData ফাংশন এখানে শেষ হয়েছে
 
-    fetchData();
-    syncLocalStorage();
+  fetchData();
+  syncLocalStorage();
 
-    const handleStorageUpdate = () => syncLocalStorage();
+  const handleStorageUpdate = () => syncLocalStorage();
 
-    window.addEventListener("storage-update", handleStorageUpdate);
-    window.addEventListener("storage", handleStorageUpdate);
+  window.addEventListener("storage-update", handleStorageUpdate);
+  window.addEventListener("storage", handleStorageUpdate);
 
-    return () => {
-      window.removeEventListener("storage-update", handleStorageUpdate);
-      window.removeEventListener("storage", handleStorageUpdate);
-    };
-  }, [syncLocalStorage]);
+  return () => {
+    window.removeEventListener("storage-update", handleStorageUpdate);
+    window.removeEventListener("storage", handleStorageUpdate);
+  };
+}, [syncLocalStorage]);
 
   // Modal ESC Key Close & Body Scroll Lock
   useEffect(() => {

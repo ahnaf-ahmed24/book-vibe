@@ -7,14 +7,16 @@ import BookCard from '@/components/shared/BookCard';
 export default function Books() {
   const [booksData, setBooksData] = useState<IBook[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   // প্রাথমিক অবস্থায় ৬টি বই দেখাবে
   const [visibleCount, setVisibleCount] = useState<number>(6);
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+
+        const res = await fetch(`${baseUrl}/booksData.json`, {
           cache: 'no-store',
         });
         if (!res.ok) {
@@ -51,7 +53,7 @@ export default function Books() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-72 bg-gradient-to-r from-emerald-200/30 via-teal-100/30 to-cyan-200/30 blur-3xl -z-10 pointer-events-none rounded-full" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-10 md:mb-14">
           {/* Badge */}
@@ -87,8 +89,8 @@ export default function Books() {
           <div className="space-y-10">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6 items-stretch">
               {booksData.slice(0, visibleCount).map((book: IBook, ind: number) => (
-                <div 
-                  key={book.bookId || ind} 
+                <div
+                  key={book.bookId || ind}
                   className="transition-all duration-300 hover:-translate-y-1.5 h-full"
                 >
                   <BookCard book={book} />
@@ -104,10 +106,10 @@ export default function Books() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer"
                 >
                   <span>See More Books</span>
-                  <svg 
-                    className="w-4 h-4" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

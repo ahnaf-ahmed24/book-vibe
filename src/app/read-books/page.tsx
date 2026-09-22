@@ -9,14 +9,17 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  BarShapeProps,
   LabelList,
-  LabelProps,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from "recharts";
 import { motion } from "framer-motion";
+
+interface ChartDataItem {
+  name: string;
+  uv: number;
+  pv: number;
+}
 
 // Modern & Vibrant Color Palette
 const colors = [
@@ -37,9 +40,10 @@ const getPath = (x: number, y: number, width: number, height: number) => {
   Z`;
 };
 
-const TriangleBar = (props: BarShapeProps) => {
-  const { x, y, width, height, index } = props;
-  const color = colors[(index ?? 0) % colors.length];
+// Any/Record দিয়ে Props টাইপ করা হয়েছে যেন Recharts Custom Shape এরর না দেয়
+const TriangleBar = (props: any) => {
+  const { x = 0, y = 0, width = 0, height = 0, index = 0 } = props;
+  const color = colors[index % colors.length];
 
   return (
     <path
@@ -56,9 +60,9 @@ const TriangleBar = (props: BarShapeProps) => {
 };
 
 // Custom Label on top of each bar
-const CustomColorLabel = (props: LabelProps) => {
-  const { x, y, width, value, index } = props;
-  const fill = colors[(index ?? 0) % colors.length];
+const CustomColorLabel = (props: any) => {
+  const { x, y, width, value, index = 0 } = props;
+  const fill = colors[index % colors.length];
 
   if (x === undefined || y === undefined || width === undefined) return null;
 
@@ -76,10 +80,10 @@ const CustomColorLabel = (props: LabelProps) => {
   );
 };
 
-// Custom Glassmorphism Tooltip
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+// Custom Glassmorphism Tooltip (সংশোধিত টাইপিং)
+const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const data = payload[0].payload as ChartDataItem;
     return (
       <div className="bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-gray-100 flex flex-col gap-1">
         <p className="font-bold text-gray-800 text-sm">{data.name}</p>
@@ -93,17 +97,18 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
 };
 
 const ReadBooks = () => {
-  const { readBooks } = useContext(BooksContext);
+  const context = useContext(BooksContext);
+  const readBooks: IBook[] = context?.readBooks || [];
 
-  const data = readBooks?.map((book: IBook, index: number) => ({
+  const data: ChartDataItem[] = readBooks.map((book: IBook, index: number) => ({
     name: book.bookName,
-    uv: book.totalPages,
+    uv: Number(book.totalPages) || 0,
     pv: index + 1,
   }));
 
   // Total pages calculation for summary badge
-  const totalPagesRead = readBooks?.reduce(
-    (acc: number, book: IBook) => acc + (book.totalPages || 0),
+  const totalPagesRead = readBooks.reduce(
+    (acc: number, book: IBook) => acc + (Number(book.totalPages) || 0),
     0
   );
 
@@ -123,7 +128,7 @@ const ReadBooks = () => {
           Visual representation of total pages read per book.
         </p>
 
-        {readBooks?.length > 0 && (
+        {readBooks.length > 0 && (
           <div className="mt-4 inline-flex items-center gap-3 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full border border-emerald-200/60 shadow-xs">
             <span className="text-xs font-semibold text-gray-600">
               Total Books: <strong className="text-emerald-600">{readBooks.length}</strong>
@@ -137,7 +142,7 @@ const ReadBooks = () => {
       </div>
 
       {/* Chart Card */}
-      {readBooks && readBooks.length > 0 ? (
+      {readBooks.length > 0 ? (
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -166,12 +171,12 @@ const ReadBooks = () => {
                 <Tooltip content={<CustomTooltip />} />
                 <Bar
                   dataKey="uv"
-                  shape={TriangleBar}
+                  shape={<TriangleBar />}
                   isAnimationActive={true}
                   animationDuration={1200}
                   animationEasing="ease-out"
                 >
-                  <LabelList content={<CustomColorLabel />} />
+                  <LabelList dataKey="uv" content={<CustomColorLabel />} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

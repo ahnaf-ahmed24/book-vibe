@@ -87,16 +87,22 @@ export default function BookDashboardAnalytics() {
         { name: "Unread/Remaining", value: unreadCount },
     ];
 
+   // Safety check: allBooks এবং readIds নিশ্চিত করা
+    const safeAllBooks = Array.isArray(allBooks) ? allBooks : [];
+    const safeReadIds = Array.isArray(readIds) ? readIds.map(id => Number(id)) : [];
+
     // ২. পেজ সম্পর্কিত গণনা
-    const readBooksDetails = allBooks.filter((book) =>
-        readIds.includes(Number(book.bookId))
+    const readBooksDetails = safeAllBooks.filter((book) =>
+        book && book.bookId !== undefined && safeReadIds.includes(Number(book.bookId))
     );
+
     const totalReadPages = readBooksDetails.reduce(
-        (acc, book) => acc + (book.totalPages || book.pages || 0),
+        (acc, book) => acc + Number(book.totalPages || book.totalPages || 0),
         0
     );
-    const totalAllPages = allBooks.reduce(
-        (acc, book) => acc + (book.totalPages || book.pages || 0),
+
+    const totalAllPages = safeAllBooks.reduce(
+        (acc, book) => acc + Number(book.totalPages || book.totalPages || 0),
         0
     );
 
@@ -106,15 +112,16 @@ export default function BookDashboardAnalytics() {
     ];
 
     // ৩. বার চার্ট ডাটা
-    const bookPagesBarData = allBooks.map((book) => ({
-        name: book.bookName
-            ? book.bookName.length > 12
-                ? book.bookName.slice(0, 12) + "..."
-                : book.bookName
-            : "Book",
-        pages: book.totalPages || book.pages || 0,
-        status: readIds.includes(Number(book.bookId)) ? "Read" : "Unread",
-    }));
+    const bookPagesBarData = safeAllBooks.map((book) => {
+        const bookName = book?.bookName || "Book";
+        const isRead = book && book.bookId !== undefined && safeReadIds.includes(Number(book.bookId));
+
+        return {
+            name: bookName.length > 12 ? bookName.slice(0, 12) + "..." : bookName,
+            pages: Number(book?.totalPages || book?.totalPages || 0),
+            status: isRead ? "Read" : "Unread",
+        };
+    });
 
     return (
         <div className="w-full space-y-8 p-4 md:p-6 bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-800/80 shadow-xl my-6 text-slate-100">

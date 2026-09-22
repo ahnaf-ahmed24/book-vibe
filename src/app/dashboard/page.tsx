@@ -2,7 +2,7 @@
 
 import BookDashboardAnalytics from "./BookDashboardAnalytics";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import type { Book } from "@/types/books.type";
+import type { IBook } from "@/types/books.type";
 import { getReadBooks, getWishlist } from "@/utils/localStorage";
 import {
   BookOpen,
@@ -22,7 +22,7 @@ import {
 import Image from "next/image";
 
 export default function DashboardPage() {
-  const [allBooks, setAllBooks] = useState<Book[]>([]);
+  const [allBooks, setAllBooks] = useState<IBook[]>([]);
   const [readBookIds, setReadBookIds] = useState<number[]>([]);
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
 
@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<IBook | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Pagination limit state
@@ -45,7 +45,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`);
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+        const res = await fetch(`${baseUrl}/booksData.json`, {
+          cache: 'no-store',
+        });
         const data = await res.json();
         setAllBooks(data);
       } catch (error) {
@@ -156,7 +159,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-4 sm:p-6 md:p-10 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
-        
+
         {/* Header Banner */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 p-8 md:p-10 text-white shadow-xl shadow-emerald-500/10">
           <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
@@ -225,42 +228,39 @@ export default function DashboardPage() {
         </div>
 
 
-        <BookDashboardAnalytics />  
+        <BookDashboardAnalytics />
 
         {/* Controls Section */}
         <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-      
-          
+
+
           {/* Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div className="flex p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl">
               <button
                 onClick={() => setActiveTab("all")}
-                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
-                  activeTab === "all"
+                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${activeTab === "all"
                     ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 All Books ({allBooks.length})
               </button>
               <button
                 onClick={() => setActiveTab("read")}
-                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
-                  activeTab === "read"
+                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${activeTab === "read"
                     ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Read Books ({readBookIds.length})
               </button>
               <button
                 onClick={() => setActiveTab("wishlist")}
-                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
-                  activeTab === "wishlist"
+                className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all ${activeTab === "wishlist"
                     ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Wishlist ({wishlistIds.length})
               </button>
@@ -270,11 +270,10 @@ export default function DashboardPage() {
             <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition ${
-                  viewMode === "grid"
+                className={`p-2 rounded-lg transition ${viewMode === "grid"
                     ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
                 title="Grid View"
                 aria-label="Grid View"
               >
@@ -282,11 +281,10 @@ export default function DashboardPage() {
               </button>
               <button
                 onClick={() => setViewMode("table")}
-                className={`p-2 rounded-lg transition ${
-                  viewMode === "table"
+                className={`p-2 rounded-lg transition ${viewMode === "table"
                     ? "bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
-                }`}
+                  }`}
                 title="Table View"
                 aria-label="Table View"
               >
@@ -479,15 +477,15 @@ export default function DashboardPage() {
 
         {/* Modal */}
         {selectedBook && (
-          <div 
+          <div
             className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={() => setSelectedBook(null)}
           >
-            <div 
+            <div
               className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 dark:border-slate-800 relative space-y-6 animate-in fade-in zoom-in-95 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
-              
+
               <button
                 onClick={() => setSelectedBook(null)}
                 className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
@@ -514,7 +512,7 @@ export default function DashboardPage() {
                     {selectedBook.bookName}
                   </h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400">By {selectedBook.author}</p>
-                  
+
                   <div className="pt-2 text-xs text-slate-400 space-y-0.5">
                     <p>Publisher: <span className="text-slate-600 dark:text-slate-300 font-medium">{selectedBook.publisher}</span></p>
                     <p>Year: <span className="text-slate-600 dark:text-slate-300 font-medium">{selectedBook.yearOfPublishing}</span></p>

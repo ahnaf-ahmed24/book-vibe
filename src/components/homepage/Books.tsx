@@ -3,8 +3,12 @@ import BookCard from '../shared/BookCard';
 import { IBook } from '@/types/books.type';
 
 const getBooks = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
-    cache: 'no-store', // সবসময় লেটেস্ট ডাটা পাওয়ার জন্য
+  // const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/booksData.json`, {
+  //   cache: 'no-store', // সবসময় লেটেস্ট ডাটা পাওয়ার জন্য
+  // });
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+  const res = await fetch(`${baseUrl}/booksData.json`, {
+    cache: 'no-store',
   });
   const books = await res.json();
   return books;

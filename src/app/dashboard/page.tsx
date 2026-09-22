@@ -21,11 +21,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-
 export default function DashboardPage() {
   const [allBooks, setAllBooks] = useState<IBook[]>([]);
-  const [readBookIds, setReadBookIds] = useState<number[]>([]);
-  const [wishlistIds, setWishlistIds] = useState<number[]>([]);
+  const [readBookIds, setReadBookIds] = useState<(number | string)[]>([]);
+  const [wishlistIds, setWishlistIds] = useState<(number | string)[]>([]);
 
   const [activeTab, setActiveTab] = useState<"all" | "read" | "wishlist">("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,47 +36,54 @@ export default function DashboardPage() {
   // Pagination limit state
   const [visibleCount, setVisibleCount] = useState(6);
 
+  // Helper function to safely extract IDs from Primitive or Object Arrays
+  const normalizeIds = (items: any[]): (number | string)[] => {
+    if (!Array.isArray(items)) return [];
+    return items
+      .map((item) => (typeof item === "object" && item !== null ? item.bookId ?? item.id : item))
+      .filter((id) => id !== undefined && id !== null);
+  };
+
   // Sync Local Storage
   const syncLocalStorage = useCallback(() => {
-    setReadBookIds(getReadBooks());
-    setWishlistIds(getWishlist());
+    if (typeof window !== "undefined") {
+      const rawRead = getReadBooks() || [];
+      const rawWishlist = getWishlist() || [];
+
+      setReadBookIds(normalizeIds(rawRead));
+      setWishlistIds(normalizeIds(rawWishlist));
+    }
   }, []);
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // Vercel বা Local environment এর base URL সেট করা
-    const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
-    
-    // Server-side fetching
-    const res = await fetch(`${baseUrl}/booksData.json`, {
-      cache: 'no-store', // সবসময় ফ্রেশ ডাটা পাওয়ার জন্য
-    });
-      const data = await res.json();
-      setAllBooks(data);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-      
-    } 
-     finally {
-      // ডাটা সফলভাবে আসুক বা এরর হোক, লোডার বন্ধ করতে হবে
-      setLoading(false);
-    }
-  }; 
+    const fetchData = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || "http://localhost:3000";
+        const res = await fetch(`${baseUrl}/booksData.json`, {
+          cache: "no-store",
+        });
+        const data = await res.json();
+        setAllBooks(data);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchData();
-  // syncLocalStorage();
+    fetchData();
+    syncLocalStorage(); // Local Storage সিঙ্ক চালু করা হয়েছে
 
-  const handleStorageUpdate = () => syncLocalStorage();
+    const handleStorageUpdate = () => syncLocalStorage();
 
-  window.addEventListener("storage-update", handleStorageUpdate);
-  window.addEventListener("storage", handleStorageUpdate);
+    window.addEventListener("storage-update", handleStorageUpdate);
+    window.addEventListener("storage", handleStorageUpdate);
 
-  return () => {
-    window.removeEventListener("storage-update", handleStorageUpdate);
-    window.removeEventListener("storage", handleStorageUpdate);
-  };
-}, [syncLocalStorage]);
+    return () => {
+      window.removeEventListener("storage-update", handleStorageUpdate);
+      window.removeEventListener("storage", handleStorageUpdate);
+    };
+  }, [syncLocalStorage]);
 
   // Modal ESC Key Close & Body Scroll Lock
   useEffect(() => {
@@ -104,15 +110,19 @@ export default function DashboardPage() {
     return ["All", ...Array.from(set)];
   }, [allBooks]);
 
+  // String Conversion array to handle string vs number ID comparison safely
+  const stringifiedReadIds = useMemo(() => readBookIds.map(String), [readBookIds]);
+  const stringifiedWishlistIds = useMemo(() => wishlistIds.map(String), [wishlistIds]);
+
   const currentCategoryBooks = useMemo(() => {
     if (activeTab === "read") {
-      return allBooks.filter((book) => readBookIds.includes(book.bookId));
+      return allBooks.filter((book) => stringifiedReadIds.includes(String(book.bookId)));
     }
     if (activeTab === "wishlist") {
-      return allBooks.filter((book) => wishlistIds.includes(book.bookId));
+      return allBooks.filter((book) => stringifiedWishlistIds.includes(String(book.bookId)));
     }
     return allBooks;
-  }, [allBooks, activeTab, readBookIds, wishlistIds]);
+  }, [allBooks, activeTab, stringifiedReadIds, stringifiedWishlistIds]);
 
   const filteredBooks = useMemo(() => {
     return currentCategoryBooks.filter((book) => {
@@ -135,8 +145,8 @@ export default function DashboardPage() {
   }, [filteredBooks, visibleCount]);
 
   const readBooksList = useMemo(
-    () => allBooks.filter((b) => readBookIds.includes(b.bookId)),
-    [allBooks, readBookIds]
+    () => allBooks.filter((b) => stringifiedReadIds.includes(String(b.bookId))),
+    [allBooks, stringifiedReadIds]
   );
 
   const totalPagesRead = useMemo(() => {
@@ -234,12 +244,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-
         <BookDashboardAnalytics />
 
         {/* Controls Section */}
         <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-
 
           {/* Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">

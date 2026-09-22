@@ -14,7 +14,7 @@ export default function Books() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL || 'http://localhost:3000';
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_BASE_URL;
 
         const res = await fetch(`${baseUrl}/booksData.json`, {
           cache: 'no-store',
